@@ -4,6 +4,7 @@ import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
 import com.gorodeckii.hotels.R
 import com.gorodeckii.hotels.api.RetrofitProvider
+import com.gorodeckii.hotels.api.models.Company
 import com.gorodeckii.hotels.api.models.CompanyList
 import com.gorodeckii.hotels.api.models.FlightList
 import com.gorodeckii.hotels.api.models.HotelList
@@ -21,6 +22,7 @@ class MainPresenter : MvpPresenter<MainView>() {
 
     private var companyList: CompanyList? = null
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private var currentUnfilteredTours: List<Tour>? = null
 
     fun getInfo() {
 
@@ -44,7 +46,8 @@ class MainPresenter : MvpPresenter<MainView>() {
             }
             tours
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ result: List<Tour> ->
-            viewState.showTours(result)
+            currentUnfilteredTours = result
+            viewState.showTours(result, false)
             viewState.hideProgress()
         }, {
             viewState.showMessage(R.string.data_load_error)
@@ -68,6 +71,25 @@ class MainPresenter : MvpPresenter<MainView>() {
         } ?: kotlin.run {
             viewState.showMessage(R.string.companies_error)
         }
+    }
+
+    fun filterClicked() {
+        companyList?.let {
+            viewState.showFilter(it.companies)
+        } ?: kotlin.run {
+            viewState.showMessage(R.string.companies_error)
+        }
+    }
+
+    fun filterCompanySelected(company: Company) {
+        val filteredTours = currentUnfilteredTours?.filter { it.flights.any { flight -> flight.companyId == company.id } }
+        if (filteredTours != null) {
+            viewState.showTours(filteredTours, true)
+        }
+    }
+
+    fun clearFilterClicked() {
+        currentUnfilteredTours?.let { viewState.showTours(it, false) }
     }
 
     override fun onDestroy() {

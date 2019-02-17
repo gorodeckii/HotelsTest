@@ -7,11 +7,14 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.gorodeckii.hotels.R
+import com.gorodeckii.hotels.api.models.Company
 import com.gorodeckii.hotels.api.models.inner.FlightVariant
 import com.gorodeckii.hotels.api.models.inner.Tour
 import com.gorodeckii.hotels.presenters.MainPresenter
@@ -28,15 +31,16 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     private var dialog: AlertDialog? = null
 
+    private lateinit var filterSnackbar: Snackbar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        filterSnackbar = Snackbar.make(root_view, R.string.list_filtered, Snackbar.LENGTH_INDEFINITE)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-            //TODO фильтр
+        fab.setOnClickListener {
+            presenter.filterClicked()
         }
 
         main_recycler.layoutManager = LinearLayoutManager(this)
@@ -47,12 +51,32 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         presenter.getInfo()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        super.onOptionsItemSelected(item)
+        if (item?.itemId == R.id.menu_clear_filter) {
+            presenter.clearFilterClicked()
+        }
+        return false
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         dialog?.dismiss()
+        filterSnackbar.dismiss()
     }
 
-    override fun showTours(tours: List<Tour>) {
+    override fun showTours(tours: List<Tour>, isFiltered: Boolean) {
+        adapter.setBottomPaddingVisible(isFiltered)
+        if (isFiltered) {
+            filterSnackbar.show()
+        } else {
+            filterSnackbar.dismiss()
+        }
         adapter.items = tours
     }
 
@@ -68,10 +92,19 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = FlightVariantsAdapter(flightVariants, Consumer {
             dialog?.dismiss()
-            Snackbar.make(root_view, String.format(getString(R.string.flight_chosen_placeholder), it.company.name), Snackbar.LENGTH_LONG).show()
+            Toast.makeText(this, String.format(getString(R.string.flight_chosen_placeholder), it.company.name), Toast.LENGTH_LONG).show()
         })
         dialog = AlertDialog.Builder(this).setTitle(R.string.choose_flight)
             .setView(view).create()
+        dialog?.show()
+    }
+
+    override fun showFilter(companies: Array<Company>) {
+        val companyNames = Array(companies.size) { companies[it].name }
+        dialog = AlertDialog.Builder(this).setTitle(R.string.filter).setItems(companyNames) { dialog, which ->
+            dialog.dismiss()
+            presenter.filterCompanySelected(companies[which])
+        }.create()
         dialog?.show()
     }
 

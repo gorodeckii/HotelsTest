@@ -10,4 +10,7 @@
     <string name="companies_error">Не удалось загрузить информацию об авиакомпаниях</string>
     <string name="choose_flight">Выберите перелёт</string>
     <string name="flight_chosen_placeholder">Выбран перелёт компании %s</string>
+    <string name="clear_filter">Сбросить фильтр</string>
+    <string name="filter">Фильтр</string>
+    <string name="list_filtered">Список отфильтрован</string>
 </resources>

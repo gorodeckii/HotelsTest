@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatActivity
 import com.arellomobile.mvp.presenter.InjectPresenter
@@ -41,6 +42,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         main_recycler.layoutManager = LinearLayoutManager(this)
         main_recycler.adapter = adapter
 
+        main_refresh_layout.setOnRefreshListener { presenter.getInfo() }
+
         presenter.getInfo()
     }
 
@@ -51,6 +54,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     override fun showTours(tours: List<Tour>) {
         adapter.items = tours
+    }
+
+    override fun hideProgress() {
+        main_progress_bar.visibility = View.GONE
+        main_recycler.visibility = View.VISIBLE
+        main_refresh_layout.isRefreshing = false
     }
 
     override fun showFlightVariants(flightVariants: List<FlightVariant>) {

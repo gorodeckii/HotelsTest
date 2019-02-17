@@ -43,9 +43,13 @@ class MainPresenter : MvpPresenter<MainView>() {
                 tours.add(Tour(hotel, flights.toTypedArray(), minTotalPrice))
             }
             tours
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { result: List<Tour> ->
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ result: List<Tour> ->
             viewState.showTours(result)
-        }
+            viewState.hideProgress()
+        }, {
+            viewState.showMessage(R.string.data_load_error)
+            viewState.hideProgress()
+        })
 
         compositeDisposable.add(disposable)
 

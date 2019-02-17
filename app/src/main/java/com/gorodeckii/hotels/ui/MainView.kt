@@ -20,4 +20,7 @@ interface MainView : MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun showMessage(@StringRes messageId: Int)
 
+    @StateStrategyType(OneExecutionStateStrategy::class)
+    fun hideProgress()
+
 }

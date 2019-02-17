@@ -6,6 +6,7 @@
     <string name="flight_variants_placeholder_many">"%d вариантов перелёта"</string>
     <string name="price_placeholder">%d р</string>
     <string name="min_price_placeholder">от %d р</string>
+    <string name="data_load_error">При получении данных возникла ошибка, возможно отсутствует соединение с интернетом</string>
     <string name="companies_error">Не удалось загрузить информацию об авиакомпаниях</string>
     <string name="choose_flight">Выберите перелёт</string>
     <string name="flight_chosen_placeholder">Выбран перелёт компании %s</string>
